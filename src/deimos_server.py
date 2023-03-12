@@ -23,4 +23,3 @@ def deimosConnect():
         #communication_socket.close()
         communication_socket.send(input("Message: ").encode('utf-8'))
 
-deimosConnect()
