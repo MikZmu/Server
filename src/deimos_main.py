@@ -1,3 +1,7 @@
 import deimos_server
 
-deimos_server.deimosConnect()
+
+import threading
+import deimos_server
+deimos_server.init()
+
