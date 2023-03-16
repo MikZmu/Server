@@ -4,8 +4,11 @@ import threading
 import os
 import time
 import subprocess
+import requests
 
-
+def getip():
+    ip = requests.get('https://api.ipify.org').text
+    print('My public IP address is: {}'.format(ip))
 
 
 def kill_process_using_port(port):
@@ -31,7 +34,7 @@ def bind():
 def conn():
     try:
         global phobos, address
-        phobos, address= server.accept()
+        phobos, address= server.accept(5)
     except:
             print('Awaiting connection... ')
             time.sleep(3)
@@ -42,6 +45,7 @@ def init():
     host = socket.gethostbyname(socket.gethostname())  #24:50 dla VB
     port = 9999
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
+    getip()
     bind()
     conn()
     print(f'Connected with {address}')  
