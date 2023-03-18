@@ -22,19 +22,19 @@ def kill_process_using_port(port):
 
 def bind():
     try:
-        kill_process_using_port(9999) 
-        server.bind((host, port))
-        server.listen()
+        kill_process_using_port(11111) 
+        server.bind(("", port))
+        server.listen(50)
     except:
         print('You messed up my order ! Restart PHOBOS !!!!!!!!!!!!!')
-        kill_process_using_port(9999)
+        kill_process_using_port(11111)
         time.sleep(3)
         bind()
 
 def conn():
     try:
         global phobos, address
-        phobos, address= server.accept(5)
+        phobos, address= server.accept()
     except:
             print('Awaiting connection... ')
             time.sleep(3)
@@ -43,7 +43,8 @@ def conn():
 def init():
     global host, port, server
     host = socket.gethostbyname(socket.gethostname())  #24:50 dla VB
-    port = 9999
+    #host = '0.0.0.0'  #24:50 dla VB
+    port = 11111
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
     getip()
     bind()
