@@ -4,30 +4,30 @@ import threading
 import os
 import time
 import subprocess
-import requests
+#import requests 
 
-def getip():
-    ip = requests.get('https://api.ipify.org').text
-    print('My public IP address is: {}'.format(ip))
+#def getip():
+   # ip = requests.get('https://api.ipify.org').text
+    #print('My public IP address is: {}'.format(ip))
 
 
-def kill_process_using_port(port):
+'''def kill_process_using_port(port):
     pid = subprocess.run(
         ['lsof', '-t', f'-i:{port}'], text=True, capture_output=True
     ).stdout.strip()
     if pid:
         if subprocess.run(['kill', '-TERM', pid]).returncode != 0:
             subprocess.run(['kill', '-KILL', pid], check=True)
-        time.sleep(1)  # Give OS time to free up the PORT usage
+        time.sleep(1)  # Give OS time to free up the PORT usage'''
 
 def bind():
     try:
-        kill_process_using_port(11111) 
+        #kill_process_using_port(11111) 
         server.bind(("", port))
         server.listen(50)
     except:
         print('You messed up my order ! Restart PHOBOS !!!!!!!!!!!!!')
-        kill_process_using_port(11111)
+        #kill_process_using_port(11111)
         time.sleep(3)
         bind()
 
@@ -44,9 +44,9 @@ def init():
     global host, port, server
     host = socket.gethostbyname(socket.gethostname())  #24:50 dla VB
     #host = '0.0.0.0'  #24:50 dla VB
-    port = 11111
+    port = 9999
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
-    getip()
+    #getip()
     bind()
     conn()
     print(f'Connected with {address}')  
