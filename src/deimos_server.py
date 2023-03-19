@@ -4,27 +4,30 @@ import threading
 import os
 import time
 import subprocess
-import requests
+#import requests
 
-def getip():
-    ip = requests.get('https://api.ipify.org').text
-    print('My public IP address is: {}'.format(ip))
+#def getip():
+#    ip = requests.get('https://api.ipify.org').text    
+#    print('My public IP address is: {}'.format(ip))
 
 
 def kill_process_using_port(port):
-    pid = subprocess.run(
-        ['lsof', '-t', f'-i:{port}'], text=True, capture_output=True
-    ).stdout.strip()
-    if pid:
-        if subprocess.run(['kill', '-TERM', pid]).returncode != 0:
-            subprocess.run(['kill', '-KILL', pid], check=True)
-        time.sleep(1)  # Give OS time to free up the PORT usage
+    try:
+        pid = subprocess.run(
+            ['lsof', '-t', f'-i:{port}'], text=True, capture_output=True
+        ).stdout.strip()
+        if pid:
+            if subprocess.run(['kill', '-TERM', pid]).returncode != 0:
+                subprocess.run(['kill', '-KILL', pid], check=True)
+            time.sleep(1)  # Give OS time to free up the PORT usage
+    except:
+        print("possibly not linux ? cant kill port") 
 
 def bind():
     try:
-        kill_process_using_port(9999) 
+        kill_process_using_port(9999)
         server.bind((host, port))
-        server.listen()
+        server.listen(5)
     except:
         print('You messed up my order ! Restart PHOBOS !!!!!!!!!!!!!')
         kill_process_using_port(9999)
@@ -34,7 +37,7 @@ def bind():
 def conn():
     try:
         global phobos, address
-        phobos, address= server.accept(5)
+        phobos, address= server.accept()
     except:
             print('Awaiting connection... ')
             time.sleep(3)
@@ -42,10 +45,11 @@ def conn():
 
 def init():
     global host, port, server
-    host = socket.gethostbyname(socket.gethostname())  #24:50 dla VB
-    port = 9999
+    #host = socket.gethostbyname(socket.gethostname())  #24:50 dla VB
+    host = '0.0.0.0'
+    port = 11111
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
-    getip()
+    #getip()
     bind()
     conn()
     print(f'Connected with {address}')  
