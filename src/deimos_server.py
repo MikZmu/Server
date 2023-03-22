@@ -4,94 +4,147 @@ import threading
 import os
 import time
 import subprocess
+import sys
 #import requests 
+
+
+global host, port, server, linuxMode
+host = '0.0.0.0'
+port = 9999
+global state
+state = ['isLinux', 'streaming', 'connected', 'connecting', 'binding', 'quitPrompt']
+global curState
+
 
 #def getip():
    # ip = requests.get('https://api.ipify.org').text
     #print('My public IP address is: {}'.format(ip))
 
 
-'''def kill_process_using_port(port):
-    pid = subprocess.run(
-        ['lsof', '-t', f'-i:{port}'], text=True, capture_output=True
-    ).stdout.strip()
-    if pid:
-        if subprocess.run(['kill', '-TERM', pid]).returncode != 0:
-            subprocess.run(['kill', '-KILL', pid], check=True)
-        time.sleep(1)  # Give OS time to free up the PORT usage'''
+def kill_process_using_port(port):
+    try:
+        pid = subprocess.run(
+            ['lsof', '-t', f'-i:{port}'], text=True, capture_output=True
+        ).stdout.strip()
+        if pid:
+            if subprocess.run(['kill', '-TERM', pid]).returncode != 0:
+                subprocess.run(['kill', '-KILL', pid], check=True)
+            time.sleep(1)  # Give OS time to free up the PORT usage'''
+    except:
+        print("Maybe it is not Linux ???")
 
 def bind():
-    try:
+    global server
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
+    global curState
+    curState = 'binding'
+    if(linuxMode == 1):
         kill_process_using_port(9999) 
+    try:
         server.bind((host, port))
         server.listen()
+        conn()
     except:
-        print('You messed up my order ! Restart PHOBOS !!!!!!!!!!!!!')
+        print('You might have messed up run order. Try restarting Phobos pls :___)')
         #kill_process_using_port(11111)
-        time.sleep(3)
+        time.sleep(5)
         bind()
 
 def conn():
+    global curState
+    curState = 'connecting'
     try:
         global phobos, address
         phobos, address= server.accept()
+        print(f'Connected with {address}')
+        curState ='connected'
     except:
-            print('Awaiting connection... ')
-            time.sleep(3)
-            conn()
+        print('Awaiting connection... ')
+        time.sleep(5)
+        conn()
 
 def init():
-    global host, port, server
-    host = socket.gethostbyname(socket.gethostname())  #24:50 dla VB
-    port = 9999
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
-    #getip()
+    command_thread = threading.Thread(target=command)
+    receive_thread = threading.Thread(target=receive)
+    command_thread.start()
+    receive_thread.start()
+    isLinux()
+
+def isLinux():
+    global curState
+    curState = 'isLinux'
+    print("Enter 1 if program runs on Linux: ")
+    isLin = input()
+    global linuxMode
+
+    if(isLin == '1'):
+        linuxMode = 1
+    else:
+        linuxMode = 0
     bind()
-    conn()
-    print(f'Connected with {address}')  
-    recv_thread = threading.Thread(target=handle)
-    send_thread = threading.Thread(target=sendMessage)
-    recv_thread.start()
-    send_thread.start()      
-
-    
-
-def sendMessage():
-    while True:
-        msg = input()
-        phobos.send(msg.encode('ascii'))
-
-def command(keyword):
-        try:
-            msg = input()
-            phobos.send(msg.encode('ascii'))
-        except:
-            print('broken pipe ?')
 
 
-def handle(): 
+def command():
+        while True:
+            try:
+                msg = input()
+                if(msg != ''):
+                    handle(msg)
+            except:
+                time.sleep(1)
+
+
+def receive():
     while True:
         try:
-            message = phobos.recv(1024).decode('ascii')
-            if(message != ""):
-                if message == "quit":
-                    print('now i rest')
-                    command("quit")
-                    phobos.close()
-                elif(message == 'sendFile'):
-                    #deimosChat()
-                    print("msg")
-                elif(message == 2):
-                    print("file")
-                    #deimosFile()
-                elif(message == 3):
-                    print("vid")
-                    #deimosVid()
-                else:
-                    print(message)
+            message = phobos.recv(4096).decode('ascii')
+            if(message != ''):
+                print(message)
+            #if(message != ''):
+            #    handle(message)
         except:
-            print('im waiting god damn it !')
             time.sleep(5)
+            if(curState == 'connected'):
+                print('OMG CONNECTION LOST -> TRYING TO RECONNECT')
+                conn()
+            
+
+def quitPrompt():
+    global curState
+    curState = 'quitPrompt'
+    chooser = input('Enter ''stop'' to terminate')
+    if(chooser =='stop'):
+        print('goodbye')
+        sys.exit()
+
+
+def communicationBreakdown():
+    global curState
+    curState = 'communicationBreakdown'
+    try:
+        phobos.close()
+    except:
+        print('attempting to close connection ...')
+        communicationBreakdown()
+
+
+#'isLinux', 'streaming', 'connected', 'connecting', 'binding', 'quitPrompt'
+
+def handle(handled): 
+        if handled == "stop":
+            if(curState == 'connecting' or curState == 'binding'):
+                isLinux()
+            elif(curState == 'connected' or curState =='streaming'):
+                communicationBreakdown()
+                isLinux()
+            elif(curState == 'isLinux' or curState == 'quitPrompt'):
+                quitPrompt()
+                isLinux()
+        elif(handled == 'browse'):
+            #browse()
+            print("waiting For Browse function")
+        elif(curState == 'connected'):
+            phobos.send(str(handled).encode('ascii'))
 
 
 
