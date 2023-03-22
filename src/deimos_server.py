@@ -42,9 +42,9 @@ def conn():
 
 def init():
     global host, port, server
-    host = socket.gethostbyname(socket.gethostname())  #24:50 dla VB
+    host = "0.0.0.0"  #24:50 dla VB
     #host = '0.0.0.0'  #24:50 dla VB
-    port = 9999
+    port = 11111
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
     #getip()
     bind()
