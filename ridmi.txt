@@ -2,3 +2,8 @@
 https://www.liquidweb.com/kb/install-pip-windows/ -- instaluj pip
 --instaluj opencv
 https://pypi.org/project/imutils/ --instaluj imutils
+https://git-scm.com/download/linux
+
+https://code.visualstudio.com/docs/setup/linux
+
+https://confluence.atlassian.com/bitbucketserver/basic-git-commands-776639767.html
