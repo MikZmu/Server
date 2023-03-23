@@ -1,0 +1,4 @@
+--instaluj python
+https://www.liquidweb.com/kb/install-pip-windows/ -- instaluj pip
+--instaluj opencv
+https://pypi.org/project/imutils/ --instaluj imutils

@@ -5,7 +5,18 @@ import os
 import time
 import subprocess
 import sys
+import cv2
+import imutils
+import queue
+import pyaudio
+import wave
+import pickle
+import base64
 #import requests 
+
+
+
+
 
 
 global host, port, server, linuxMode
@@ -104,9 +115,7 @@ def receive():
             #    handle(message)
         except:
             time.sleep(5)
-            if(curState == 'connected'):
-                print('OMG CONNECTION LOST -> TRYING TO RECONNECT')
-                conn()
+
             
 
 def quitPrompt():
@@ -145,6 +154,8 @@ def handle(handled):
             print("waiting For Browse function")
         elif(curState == 'connected'):
             phobos.send(str(handled).encode('ascii'))
+        if handled == 'film':
+            video_stream()
 
 
 
@@ -223,3 +234,65 @@ def menu2():
             deimosFile()
         if(incoming == 3):
             deimosVid()"""
+
+
+
+
+"""q = queue.Queue(maxsize=10)
+absolutePath = os.path.dirname(os.path.realpath(__file__))
+relativePath = r"videos\vid1.mp4"
+filename = os.path.join(absolutePath, relativePath)  
+command = "ffmpeg -i {} -ab 160k -ac 2 -ar 44100 -vn {}".format(filename,'temp.wav')
+os.system(command)
+
+BUFF_SIZE = 65536
+vid = cv2.VideoCapture(filename)
+FPS = vid.get(cv2.CAP_PROP_FPS)
+global TS
+TS = (0.5/FPS)
+BREAK=False
+totalNoFrames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
+durationInSeconds = float(totalNoFrames) / float(FPS)
+d=vid.get(cv2.CAP_PROP_POS_MSEC)
+
+
+
+def video_stream():
+    global TS
+    fps,st,frames_to_count,cnt = (0,0,1,0)
+    cv2.namedWindow('TRANSMITTING VIDEO')        
+    cv2.moveWindow('TRANSMITTING VIDEO', 10,30) 
+    while True:
+        msg,client_addr = phobos.recvfrom(BUFF_SIZE)
+        print('GOT connection from ',client_addr)
+        WIDTH=400
+        
+        while(True):
+            frame = q.get()
+            encoded,buffer = cv2.imencode('.jpeg',frame,[cv2.IMWRITE_JPEG_QUALITY,80])
+            message = base64.b64encode(buffer)
+            phobos.sendto(message,client_addr)
+            frame = cv2.putText(frame,'FPS: '+str(round(fps,1)),(10,40),cv2.FONT_HERSHEY_SIMPLEX,0.7,(0,0,255),2)
+            if cnt == frames_to_count:
+                try:
+                    fps = (frames_to_count/(time.time()-st))
+                    st=time.time()
+                    cnt=0
+                    if fps>FPS:
+                        TS+=0.001
+                    elif fps<FPS:
+                        TS-=0.001
+                    else:
+                        pass
+                except:
+                    pass
+            cnt+=1
+            
+            
+            
+            cv2.imshow('TRANSMITTING VIDEO', frame)
+            key = cv2.waitKey(int(1000*TS)) & 0xFF	
+            if key == ord('q'):
+                os._exit(1)
+                TS=False
+                break	"""
