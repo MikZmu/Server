@@ -1,31 +1,41 @@
+import subprocess
+import time
 import socket
 import threading
+import video_base
+import pickle
+import cv2 as cv
+import os
+import imutils
 import queue
-import time
-import subprocess
-global host
+import base64
+global q
+q = queue.Queue(maxsize=10000)
+
 global bindState
-bindState = "unbound"
 global connState
+bindState = 'unbound'
 connState = 'disconnected'
-host = "0.0.0.0"
-global stream
-stream = False
-global toggle
-toggle = False
+global host
+host = '0.0.0.0'
+global minTime, maxTime, location, result, page
+minTime = '1900-01-01 00:00:00'
+maxTime = '3000-12-31 23:25:29'
+location = 'any'
+global minTimeRemote, maxTimeRemote, locationRemote
+minTimeRemote = 'any'
+maxTimeRemote = 'any'
+locationRemote = 'any'
 
-def connectionToggle():
-    global toggle
-    if(toggle == False):
-#        global toggle
-        toggle = True
-        #connThread.start()
-        connection(toggle, stream)
+
+def isLinux():
+    print("IsLinux")
+    from sys import platform
+    global linuxMode
+    if(platform == "linux" or platform == 'linux2'):    
+        linuxMode = 1   
     else:
-      #  global toggle
-        toggle = False
-        connection(toggle, stream)
-
+        linuxMode = 0
 
 def kill_process_using_port(port):
         print("kill process")
@@ -40,21 +50,42 @@ def kill_process_using_port(port):
         except:
             print("Maybe it is not Linux ???")
 
-
-
-def connection(toggle, stream):
-
-
-    if(toggle == True):
+def connection():
+        
+        def receive():
+            global connState
+            while(True):
+                try:
+                    message = phobos.recv(4096).decode('ascii')
+                    if(message != ''):
+                        remoteHandle(message)
+                except Exception as e:
+                    connState = 'disconnected'
+                    time.sleep(3)
+                    bind()
+        
+        def conn():
+            global connState
+            global vidConn
+            try:
+                global video, phobos, address
+                phobos, address= server.accept()
+                video, address = server.accept()
+                connState ='connected'
+                vidConn = 'connected'
+                t1 = threading.Thread(target=receive)
+                t1.start()
+            except Exception as e:
+                connState = str(e)
+                vidConn = str(e)
+                time.sleep(3)
+                bind()
 
         def bind():
             global server
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
             global curState
             global bindState
-            curState = 'binding'
-            print('binding')
-            
             if(linuxMode == 1):
                 kill_process_using_port(9999) 
             try:
@@ -62,58 +93,107 @@ def connection(toggle, stream):
                 server.listen()
                 bindState = "bound"
                 conn()
-
-            except:
-                print('You might have messed up run order. Try restarting Phobos pls :___)')
-                #kill_process_using_port(11111)
-                time.sleep(5)
+            except Exception as e:
+                bindState = str(e)
+                time.sleep(3)
                 bind()
 
-        def conn():
-            print('connecting')
+        while(True):
+            if(bindState != 'bound'):
+                bind()
+
+def send(message):
             global connState
-            curState = 'connecting'
             try:
-                global phobos, address
-                phobos, address= server.accept()
-                print(f'Connected with {address}')
-                connState ='connected'
-                t1 = threading.Thread(target=receive)
-                t1.start()
-            except:
-                print('Awaiting connection... ')
-                time.sleep(5)
-                bind()
+                phobos.send(str(message).encode('ascii'))
+            except Exception as e:
+                print(e)
+                connState='disconnected'
+                time.sleep(1)
+                
+def remoteHandle(handled):
+    split = handled.split("&")
+    global minTimeRemote
+    global locationRemote
+    if(split[0]=='request'):
+        locationRemote =split[1]
+        minTimeRemote = split[2]
+        maxTimeRemote = split[3]
+        tableRemote = video_base.VideoBase.dataToTable(locationRemote,minTimeRemote,maxTimeRemote)
+        pickleTable = pickle.dumps(tableRemote)
+        phobos.send(pickleTable)
+    if(split[0]=='play'):
+        id = split[1]
+        videoRecord = video_base.VideoBase.playQuery(id)
+        path = videoRecord[0][3]
+        play(path)
 
-        bind()
+def getConnState():
+    try:
+        return connState
+    except:
+        return 'disconnected'
+
+def getBindState():
+    try:
+        return bindState
+    except:
+        return 'unbound'
+    
+def getVidStete():
+     try:
+          return vidConn
+     except:
+          return 'disconnected'
+
+def play(asdf):
 
 
-        if(stream):
-            def postClientConn():
-                print("Post connection")
-                global vidClient, address
-                while(stream):
-                    vidClient, address= server.accept()
-                    print(f'Video connected with {address}')
+        def vid_info():
+                global vid
+                #rawPath = r"{}".format(asdf)
+                vid = cv.VideoCapture(asdf)
+                global FPS
+                FPS = vid.get(cv.CAP_PROP_FPS)
+                video.send(str(FPS).encode('ascii'))
+                global TS
+                TS = (0.5/FPS)
+                global BREAK
+                BREAK=False
+                print('FPS:',FPS,TS)
+                totalNoFrames = int(vid.get(cv.CAP_PROP_FRAME_COUNT))
+                durationInSeconds = float(totalNoFrames) / float(FPS)
+                d=vid.get(cv.CAP_PROP_POS_MSEC)
+                print(durationInSeconds,d)
 
+        def video_stream_gen():
+            WIDTH=400
+            stop = False
+            while(stop == False):
+                try:
+                    _,frame = vid.read()
+                    frame = imutils.resize(frame,width=WIDTH)
+                    q.put(frame)
+                    print(q.qsize())
+                except:
+                    break
+                    time.sleep(1)
+            print('Player closed')
+            global BREAK
+            BREAK=True
+            vid.release()
 
-            def receive():
-                while(True):
-                    try:
-                        message = phobos.recv(4096).decode('ascii')
-                        if(message != ''):
-                            print(message)
-                        #if(message != ''):
-                        #    handle(message)
-                    except:
-                        time.sleep(5)
+        def vid_stream():
+            while(True):
+                frame = q.get()
+                frame = cv.putText(frame,'FPS: '+str(FPS),(10,40),cv.FONT_HERSHEY_SIMPLEX,0.7,(0,0,255),2)   
+        
+                encoded,buffer = cv.imencode('.jpeg',frame,[cv.IMWRITE_JPEG_QUALITY,80])
+                message = base64.b64encode(buffer)
+                video.send(message)
 
-
-
-
-            
-
-            
-
-
-            
+        vid_info()
+        str_gen_thd = threading.Thread(target=video_stream_gen)
+        str_thd = threading.Thread(target=vid_stream)
+        str_gen_thd.start()
+        str_thd.start()

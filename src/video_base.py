@@ -111,6 +111,11 @@ class VideoBase:
 
     def dataToTable(location, startTime, endTime):
         try:
+            if(location=='ANY'):
+                sql_fetch_blob_query = """SELECT * 
+                from video_table where
+                AND time >= ? 
+                AND time <= ?"""
             sqliteConnection = sqlite3.connect('casino_video.db')
             cursor = sqliteConnection.cursor()
             tuple = (location,startTime, endTime,)
@@ -163,18 +168,18 @@ class VideoBase:
 
     def baseInit():
         VideoBase.create_video_table()
-        VideoBase.insertVid(1, "lobby", "2011-04-13 00:45:01", r"vids\bear_sits.mp4")
-        VideoBase.insertVid(2, "atrium", "2016-02-13 01:40:01", r"vids\black_father_rare_footage.mp4")
-        VideoBase.insertVid(3, "foyer", "2013-06-13 05:20:01", r"vids\desk.mp4")
-        VideoBase.insertVid(4, "lobby", "2017-08-13 06:00:01", r"vids\dog_swing.mp4")
-        VideoBase.insertVid(5, "atrium", "2015-05-13 13:57:01", r"vids\doge.mp4")
-        VideoBase.insertVid(6, "foyer", "2019-03-13 10:25:01", r"vids\eyes.mp4")
-        VideoBase.insertVid(7, "lobby", "2016-01-13 11:00:01", r"vids\feet_on_sand.mp4")
-        VideoBase.insertVid(8, "atrium", "2012-07-13 12:05:01", r"vids\hands_laptop.mp4")
-        VideoBase.insertVid(9, "foyer", "2023-09-13 12:50:01", r"vids\hors.mp4")
-        VideoBase.insertVid(10, "lobby", "2022-10-13 16:50:01", r"vids\lions.mp4")
-        VideoBase.insertVid(11, "atrium", "2020-11-13 21:15:01", r"vids\sanitizer.mp4")
-        VideoBase.insertVid(12, "foyer", "2021-12-13 23:10:01", r"vids\tired.mp4")
+        VideoBase.insertVid(1, "lobby", "2011-04-13 00:45:01", r"vids/bear_sits.mp4")
+        VideoBase.insertVid(2, "atrium", "2016-02-13 01:40:01", r"vids/black_father_rare_footage.mp4")
+        VideoBase.insertVid(3, "foyer", "2013-06-13 05:20:01", r"vids/desk.mp4")
+        VideoBase.insertVid(4, "lobby", "2017-08-13 06:00:01", r"vids/dog_swing.mp4")
+        VideoBase.insertVid(5, "atrium", "2015-05-13 13:57:01", r"src\vids\doge.mp4")
+        VideoBase.insertVid(6, "foyer", "2019-03-13 10:25:01", r"vids/eyes.mp4")
+        VideoBase.insertVid(7, "lobby", "2016-01-13 11:00:01", r"vids/feet_on_sand.mp4")
+        VideoBase.insertVid(8, "atrium", "2012-07-13 12:05:01", r"vids/hands_laptop.mp4")
+        VideoBase.insertVid(9, "foyer", "2023-09-13 12:50:01", r"vids/hors.mp4")
+        VideoBase.insertVid(10, "lobby", "2022-10-13 16:50:01", r"vids/lions.mp4")
+        VideoBase.insertVid(11, "atrium", "2020-11-13 21:15:01", r"vids/sanitizer.mp4")
+        VideoBase.insertVid(12, "foyer", "2021-12-13 23:10:01", r"vids/tired.mp4")
 
 
 #VideoBase.create_video_table()

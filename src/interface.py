@@ -14,27 +14,12 @@ import queue
 q = queue.Queue(maxsize=300)
 global state
 state = "main menu"
-global linuxMode
-global toggle
-global stream
-stream = False
-toggle = False
-global host
-host = '0.0.0.0'
+global bindState
+global connState
+global vidConn
 bindState = 'unbound'
 connState = 'disconnected'
-global vidConn
 vidConn = 'disconnected'
-global minTime, maxTime, location, result, page
-minTime = '1900-01-01 00:00:00'
-maxTime = '3000-12-31 23:25:29'
-location = 'any'
-page = 0
-global minTimeRemote, maxTimeRemote, locationRemote
-minTimeRemote = 'any'
-maxTimeRemote = 'any'
-locationRemote = 'any'
-page = 0
 
 def isLinux():
     print("IsLinux")
@@ -55,25 +40,14 @@ def interface():
     isLinux()
     while (True):
         clear()
-        if(toggle==True):
-            print("Connection: " + bindState + " :: "+ connState + f' with  {address} Video: ' + vidConn )
-        else:
-            print("Connection: OFF " + bindState + " :: " + connState)
+        print("Bind Sate " + bindState + " :: "+ connState + f'  Video: ' + vidConn )
         if(state == "main menu"):
-            print("1: Browse")
-            print("2: Toggle Connection")
-            print("3: Display IP")
+            print("1: Browse :: 2: Toggle Connection :: 3: Display IP")
             print("Command: ")
             command = input()
             handle(command)
         if(state == "browse"):
-            print("1: select place")
-            print("2: select min time")
-            print("3: select max time")
-            print('4: next page')
-            print('5 previous page')
-            print("4: connection toggle")
-            print("5: display ip")
+            print("1: select place :: 2: select min time :: 3: select max time :: 4: next page :: 5: previous page :: 6: connection toggle :: 7: display ip")
             command = input()
             handle(command)
 
@@ -93,10 +67,7 @@ def handle(command):
             for row in result:
                 print (str(row))
             state='browse'
-        if(command =='2'):
-            print("toggle connection")
-            connectionToggle()
-        if(command =='3'):
+        elif(command =='2'):
             print("display ip")
     elif(state == 'browse'):
         if(command=='1'):
@@ -112,77 +83,7 @@ def handle(command):
         
 
 
-def remoteHandle(handled):
-    split = handled.split("&")
-    global minTimeRemote
-    global locationRemote
-    if(split[0]=='request'):
-        locationRemote =split[1]
-        minTimeRemote = split[2]
-        maxTimeRemote = split[3]
-        tableRemote = video_base.VideoBase.dataToTable(locationRemote,minTimeRemote,maxTimeRemote)
-        pickleTable = pickle.dumps(tableRemote)
-        phobos.send(pickleTable)
-    if(split[0]=='play'):
-        id = split[1]
-        videoRecord = video_base.VideoBase.playQuery(id)
-        path = videoRecord[0][3]
-        play(path)
 
-
-def play(asdf):
-        command = "ffmpeg -i {} -ab 160k -ac 2 -ar 44100 -vn {}".format(video,'temp.wav')
-        os.system(command)
-
-
-        def vid_info():
-                global vid
-                #rawPath = r"{}".format(asdf)
-                vid = cv.VideoCapture(asdf)
-                global FPS
-                FPS = vid.get(cv.CAP_PROP_FPS)
-                video.send(str(FPS).encode('ascii'))
-                global TS
-                TS = (0.5/FPS)
-                global BREAK
-                BREAK=False
-                print('FPS:',FPS,TS)
-                totalNoFrames = int(vid.get(cv.CAP_PROP_FRAME_COUNT))
-                durationInSeconds = float(totalNoFrames) / float(FPS)
-                d=vid.get(cv.CAP_PROP_POS_MSEC)
-                print(durationInSeconds,d)
-
-        def video_stream_gen():
-            WIDTH=400
-            stop = False
-            while(stop == False):
-                try:
-                    _,frame = vid.read()
-                    frame = imutils.resize(frame,width=WIDTH)
-                    q.put(frame)
-                    print(q.qsize())
-                except:
-                    break
-                    time.sleep(1)
-            print('Player closed')
-            global BREAK
-            BREAK=True
-            vid.release()
-
-        def vid_stream():
-            while(True):
-                frame = q.get()
-                frame = cv.putText(frame,'FPS: '+str(FPS),(10,40),cv.FONT_HERSHEY_SIMPLEX,0.7,(0,0,255),2)   
-        
-                encoded,buffer = cv.imencode('.jpeg',frame,[cv.IMWRITE_JPEG_QUALITY,80])
-                message = base64.b64encode(buffer)
-                video.send(message)
-
-        vid_info()
-        str_gen_thd = threading.Thread(target=video_stream_gen)
-        str_thd = threading.Thread(target=vid_stream)
-        str_gen_thd.start()
-        str_thd.start()
         
 
 
@@ -199,20 +100,6 @@ def clear():
         clear = lambda: os.system('cls')
         clear()
 
-
-def connectionToggle():
-    global toggle
-    if(toggle == False):
-#        global toggle
-        toggle = True
-        #connThread.start()
-        connection(toggle, stream)
-    else:
-      #  global toggle
-        toggle = False
-        connection(toggle, stream)
-
-
 def kill_process_using_port(port):
         print("kill process")
         try:
@@ -226,98 +113,19 @@ def kill_process_using_port(port):
         except:
             print("Maybe it is not Linux ???")
 
-
-
-def connection(toggle, stream):
-
-
-    if(toggle == True):
-        def bind():
-            global server
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
-            global curState
-            global bindState
-            curState = 'binding'
-            print('binding')
-            if(linuxMode == 1):
-                kill_process_using_port(9999) 
-            try:
-                server.bind((host, 9999))
-                server.listen()
-                bindState = "bound"
-                conn()
-            except:
-                bindState = 'unbound'
-                time.sleep(5)
-                bind()
-
-        def conn():
-            print('connecting')
-            global connState
-            global vidConn
-            curState = 'connecting'
-            try:
-                global video, phobos, address
-                phobos, address= server.accept()
-                print(f'Connected with {phobos}')
-                video, address = server.accept()
-                print(f'Connected with {video}')
-                connState ='connected'
-                vidConn = 'connected'
-                t1.start()
-            except:
-                print('Awaiting connection... ')
-                time.sleep(5)
-                bind()
-
-
-
-
-        def receive():
-            global connState
-            while(True):
-                try:
-                    message = phobos.recv(4096).decode('ascii')
-                    if(message != ''):
-                        remoteHandle(message)
-                except Exception as e:
-                    print(e)
-                    connState = 'disconnected'
-                    time.sleep(5)
-                    break
-
-
-        def send(message):
-            global connState
-            try:
-                phobos.send(str(message).encode('ascii'))
-            except Exception as e:
-                print(e)
-                connState='disconnected'
-                time.sleep(1)
-                
-
-        t1 = threading.Thread(target=receive)
-
-
-        bind()
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
+def getState():
+    while(True):
+        global connState
+        connState = connection.getConnState()
+        global bindState
+        bindState = connection.getBindState()
+        global vidConn
+        vidConn = connection.getVidState()
+        time.sleep(5)
 
 
 video_base.VideoBase.baseInit()
+connection.isLinux()
+connThd = threading.Thread(target=connection.connection)
+connThd.start()
 interface()
