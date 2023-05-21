@@ -1,5 +1,6 @@
-import threading
+import sys
 import connection
+import threading
 import os
 import subprocess
 import msvcrt
@@ -8,7 +9,6 @@ import socket
 import video_base
 import pickle
 import base64
-import cv2 as cv
 import imutils
 import queue
 q = queue.Queue(maxsize=300)

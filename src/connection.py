@@ -11,7 +11,6 @@ import queue
 import base64
 global q
 q = queue.Queue(maxsize=10000)
-
 global bindState
 global connState
 bindState = 'unbound'
@@ -37,7 +36,7 @@ def isLinux():
     else:
         linuxMode = 0
 
-def kill_process_using_port(port):
+"""def kill_process_using_port(port):
         print("kill process")
         try:
             pid = subprocess.run(
@@ -48,59 +47,61 @@ def kill_process_using_port(port):
                     subprocess.run(['kill', '-KILL', pid], check=True)
                 time.sleep(1)  # Give OS time to free up the PORT usage'''
         except:
-            print("Maybe it is not Linux ???")
+            print("Maybe it is not Linux ???")"""
 
 def connection():
-        
-        def receive():
-            global connState
-            while(True):
-                try:
-                    message = phobos.recv(4096).decode('ascii')
-                    if(message != ''):
-                        remoteHandle(message)
-                except Exception as e:
-                    connState = 'disconnected'
-                    time.sleep(3)
-                    bind()
-        
-        def conn():
-            global connState
-            global vidConn
+    def receive():
+        global connState
+        while(connState == 'connected'):
+            time.sleep(0.1)
             try:
-                global video, phobos, address
-                phobos, address= server.accept()
-                video, address = server.accept()
-                connState ='connected'
-                vidConn = 'connected'
-                t1 = threading.Thread(target=receive)
-                t1.start()
+                message = phobos.recv(1024).decode('ascii')
+                if(message != ''):
+                    remoteHandle(message)
             except Exception as e:
-                connState = str(e)
-                vidConn = str(e)
+                connState = 'disconnected'
                 time.sleep(3)
-                bind()
+                break
+        bind()
+    
+    def conn():
+        global connState
+        global vidConn
+        try:
+            global video, phobos, address
+            phobos, address= server.accept()
+            video, address = server.accept()
+            connState ='connected'
+            vidConn = 'connected'
+            t1 = threading.Thread(target=receive)
+            t1.start()
+        except Exception as e:
+            connState = str(e)
+            vidConn = str(e)
+            time.sleep(3)
+            bind()
 
-        def bind():
-            global server
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
-            global curState
-            global bindState
-            if(linuxMode == 1):
-                kill_process_using_port(9999) 
-            try:
-                server.bind((host, 9999))
-                server.listen()
-                bindState = "bound"
-                conn()
-            except Exception as e:
-                bindState = str(e)
-                time.sleep(3)
-                bind()
+    def bind():
+        global server
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
+        global curState
+        global bindState
+        if(linuxMode == 1):
+            kill_process_using_port(9999) 
+        try:
+            server.bind((host, 9999))
+            server.listen()
+            bindState = "bound"
+            conn()
+        except Exception as e:
+            bindState = str(e)
+            time.sleep(3)
+            bind()
 
-        while(True):
-            if(bindState != 'bound'):
-                bind()
+    while(True):
+        time.sleep(0.1)
+        if(bindState != 'bound'):
+            bind()
 
 def send(message):
             global connState
@@ -140,7 +141,7 @@ def getBindState():
     except:
         return 'unbound'
     
-def getVidStete():
+def getVidState():
      try:
           return vidConn
      except:
@@ -179,15 +180,13 @@ def play(asdf):
                     break
                     time.sleep(1)
             print('Player closed')
-            global BREAK
-            BREAK=True
+
             vid.release()
 
         def vid_stream():
             while(True):
                 frame = q.get()
                 frame = cv.putText(frame,'FPS: '+str(FPS),(10,40),cv.FONT_HERSHEY_SIMPLEX,0.7,(0,0,255),2)   
-        
                 encoded,buffer = cv.imencode('.jpeg',frame,[cv.IMWRITE_JPEG_QUALITY,80])
                 message = base64.b64encode(buffer)
                 video.send(message)
