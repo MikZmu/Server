@@ -126,6 +126,8 @@ def getState():
 
 video_base.VideoBase.baseInit()
 connection.isLinux()
-connThd = threading.Thread(target=connection.connection)
+isConnThd = threading.Thread(target=connection.isConnected)
+isConnThd.start()
+connThd = threading.Thread(target=connection.conn)
 connThd.start()
 interface()
