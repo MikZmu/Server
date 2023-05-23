@@ -17,9 +17,8 @@ state = "main menu"
 global bindState
 global connState
 global vidConn
-bindState = 'unbound'
-connState = 'disconnected'
-vidConn = 'disconnected'
+bindState = 'a'
+connState = 'b'
 
 def isLinux():
     print("IsLinux")
@@ -37,21 +36,22 @@ def interface():
     global toggle
     global page
     global state
-    isLinux()
     while (True):
+        update.wait()
         clear()
-        print("Bind Sate " + bindState + " :: "+ connState + f'  Video: ' + vidConn )
+        print("Bind Sate " + bindState + " :: "+ connState)
         if(state == "main menu"):
             print("1: Browse :: 2: Toggle Connection :: 3: Display IP")
             print("Command: ")
-            command = input()
-            handle(command)
-        if(state == "browse"):
+        elif(state == "browse"):
             print("1: select place :: 2: select min time :: 3: select max time :: 4: next page :: 5: previous page :: 6: connection toggle :: 7: display ip")
-            command = input()
-            handle(command)
+        update.clear()
 
-
+def command():
+    command = input()
+    if(command!=""):
+        update.set()
+        handle(command)
 
 
 def handle(command):
@@ -82,16 +82,6 @@ def handle(command):
             result = video_base.VideoBase.fiBlobData(location, minTime, maxTime)
         
 
-
-
-        
-
-
-
-
-
-
-
 def clear():
     if(linuxMode == 1):
         clear = lambda: os.system('clear')
@@ -113,21 +103,30 @@ def kill_process_using_port(port):
         except:
             print("Maybe it is not Linux ???")
 
-def getState():
+def status():
+    global connState
+    global bindState
     while(True):
-        global connState
-        connState = connection.getConnState()
-        global bindState
-        bindState = connection.getBindState()
-        global vidConn
-        vidConn = connection.getVidState()
-        time.sleep(5)
+        newconnState = connection.getConnState()
+        newbindState = connection.getBindState()
+        time.sleep(0.1)
+        if(newconnState != connState or newbindState != bindState):
+            bindState = newbindState
+            connState = newconnState
+            update.set()
 
-
+isLinux()
 video_base.VideoBase.baseInit()
 connection.isLinux()
-isConnThd = threading.Thread(target=connection.isConnected)
-isConnThd.start()
+commThd = threading.Thread(target=command)
+commThd.start()
+#isConnThd = threading.Thread(target=connection.isConnected)
+#isConnThd.start()
 connThd = threading.Thread(target=connection.conn)
 connThd.start()
-interface()
+stat = threading.Thread(target=status)
+stat.start()
+update = threading.Event()
+inter = threading.Thread(target=interface)
+inter.start()
+

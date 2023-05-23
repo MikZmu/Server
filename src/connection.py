@@ -42,17 +42,9 @@ maxTimeRemote = 'any'
 locationRemote = 'any'
 StreamProps = ps.StreamProps
 StreamProps.set_Page(StreamProps,HTML)
-address = (socket.gethostbyname(socket.gethostname()),9999)
+address2 = (socket.gethostbyname(socket.gethostname()),9998)
 
-def isConnected():
-    global bindState
-    global connState
-    while(connState == 'connected'):
-        try:
-            phobos.send(":D".encode('ascii'))
-        except:
-            bindState = 'unboound'
-            connState = 'disconnected'
+
 
 
 
@@ -148,12 +140,6 @@ def getBindState():
         return bindState
     except:
         return 'unbound'
-    
-def getVidState():
-     try:
-          return vidConn
-     except:
-          return 'disconnected'
 
 
 
@@ -162,12 +148,13 @@ def play2(asdf):
         while(True):
             mess = phobos.recv(1024).decode('ascii')
             if(mess == 'stop'):
+                capture.release()
                 strm.socket.close()
                 break
 
     try:
         StreamProps.set_Mode(StreamProps,'cv2')
-        capture = cv.VideoCapture(r'C:\Users\52 Blue\Documents\wbudowane\deimos\src\lions.mp4')
+        capture = cv.VideoCapture(asdf)
         capture.set(cv.CAP_PROP_BUFFERSIZE,4)
         capture.set(cv.CAP_PROP_FRAME_WIDTH,320)
         capture.set(cv.CAP_PROP_FRAME_HEIGHT,240)
@@ -175,14 +162,15 @@ def play2(asdf):
         capture.set(cv.CAP_PROP_FPS,fps)
         StreamProps.set_Capture(StreamProps,capture)
         StreamProps.set_Quality(StreamProps,90)
-        strm = ps.Streamer(address,StreamProps)
-        phobos.send(str(address[1]).encode("ascii"))
-        print('Server started at','http://'+address[0]+':'+str(address[1]))
+        strm = ps.Streamer(address2,StreamProps)
+        phobos.send(str(address2[1]).encode("ascii"))
+        print('Server started at','http://'+address2[0]+':'+str(address2[1]))
         stopThd = threading.Thread(target=awaitStop)
         stopThd.start()
         strm.serve_forever()
     except Exception as e:
         print(str(e))
+        capture.release()
         strm.socket.close()
 
 
@@ -191,3 +179,20 @@ def conn():
         if(bindState != 'bound'):
             bind()
         time.sleep(0.1)
+
+
+
+
+"""def isConnected():
+    global bindState
+    global connState
+    global phobos
+    while():
+        time.sleep(0.1)
+        try:
+            phobos.send("w".encode("ascii"))
+            connState = "connected"
+            bindState = 'bound'
+        except Exception as e:
+            bindState = 'unbound'
+            connState = 'disconnected'"""
