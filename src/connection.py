@@ -114,22 +114,26 @@ def send(message):
                 time.sleep(1)
                 
 def remoteHandle(handled):
+    global mode
     split = handled.split("&")
     global minTimeRemote
     global locationRemote
     if(split[0]=='request'):
+        mode = 'ppp'
         locationRemote =split[1]
         minTimeRemote = split[2]
         maxTimeRemote = split[3]
         tableRemote = video_base.VideoBase.dataToTable(locationRemote,minTimeRemote,maxTimeRemote)
         pickleTable = pickle.dumps(tableRemote)
         phobos.send(pickleTable)
+        mode = 'check'
     elif(split[0]=='play'):
+        mode = 'ppp'
         id = split[1]
         videoRecord = video_base.VideoBase.playQuery(id)
         path = videoRecord[0][3]
         play2(os.path.abspath(path))
-
+        mode = 'check'
 def getConnState():
     try:
         return connState
