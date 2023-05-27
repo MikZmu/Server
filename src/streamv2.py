@@ -20,7 +20,7 @@ def main():
     address = ("192.168.1.32",9999) # Enter your IP address 
     try:
         StreamProps.set_Mode(StreamProps,'cv2')
-        capture = cv2.VideoCapture(r'C:\Users\52 Blue\Documents\wbudowane\deimos\src\lions.mp4')
+        capture = cv2.VideoCapture(r'src\vids\lions.mp4')
         capture.set(cv2.CAP_PROP_BUFFERSIZE,4)
         capture.set(cv2.CAP_PROP_FRAME_WIDTH,320)
         capture.set(cv2.CAP_PROP_FRAME_HEIGHT,240)

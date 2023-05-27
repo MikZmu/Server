@@ -10,15 +10,15 @@ import imutils
 import queue
 import base64
 import pyshine as ps
-
+import sys
 HTML="""
 <html>
 <head>
-<title>PyShine Live Streaming</title>
+<title>stream uwu</title>
 </head>
 
 <body>
-<center><h1> PyShine Live Streaming using OpenCV </h1></center>
+<center><h1> UWUOWO </h1></center>
 <center><img src="stream.mjpg" width='640' height='480' autoplay playsinline></center>
 </body>
 </html>
@@ -42,8 +42,9 @@ maxTimeRemote = 'any'
 locationRemote = 'any'
 StreamProps = ps.StreamProps
 StreamProps.set_Page(StreamProps,HTML)
-address2 = (socket.gethostbyname(socket.gethostname()),9998)
-
+address2 = ("0.0.0.0",9998)
+global mode
+mode = 'check'
 
 
 
@@ -127,7 +128,7 @@ def remoteHandle(handled):
         id = split[1]
         videoRecord = video_base.VideoBase.playQuery(id)
         path = videoRecord[0][3]
-        play2(path)
+        play2(os.path.abspath(path))
 
 def getConnState():
     try:
@@ -144,13 +145,17 @@ def getBindState():
 
 
 def play2(asdf):
+    global mode
+    mode = 'ppp'
     def awaitStop():
         while(True):
             mess = phobos.recv(1024).decode('ascii')
             if(mess == 'stop'):
                 capture.release()
-                strm.socket.close()
+                strm.shutdown()
                 break
+            else:
+                remoteHandle(mess)
 
     try:
         StreamProps.set_Mode(StreamProps,'cv2')
@@ -169,9 +174,13 @@ def play2(asdf):
         stopThd.start()
         strm.serve_forever()
     except Exception as e:
-        print(str(e))
-        capture.release()
-        strm.socket.close()
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        strm.shutdown()
+    
+    mode = 'check'
+    
 
 
 def conn():
@@ -183,16 +192,18 @@ def conn():
 
 
 
-"""def isConnected():
+def checkSend():
     global bindState
     global connState
     global phobos
-    while():
+    global mode
+    while(True):
         time.sleep(0.1)
-        try:
-            phobos.send("w".encode("ascii"))
-            connState = "connected"
-            bindState = 'bound'
-        except Exception as e:
-            bindState = 'unbound'
-            connState = 'disconnected'"""
+        if(mode == 'check'):
+            try:
+                phobos.send("w".encode("ascii"))
+                connState = "connected"
+                bindState = 'bound'
+            except Exception as e:
+                bindState = 'unbound'
+                connState = 'disconnected'

@@ -3,7 +3,6 @@ import connection
 import threading
 import os
 import subprocess
-import msvcrt
 import time
 import socket
 import video_base
@@ -16,7 +15,6 @@ global state
 state = "main menu"
 global bindState
 global connState
-global vidConn
 bindState = 'a'
 connState = 'b'
 
@@ -120,8 +118,8 @@ video_base.VideoBase.baseInit()
 connection.isLinux()
 commThd = threading.Thread(target=command)
 commThd.start()
-#isConnThd = threading.Thread(target=connection.isConnected)
-#isConnThd.start()
+isConnThd = threading.Thread(target=connection.checkSend)
+isConnThd.start()
 connThd = threading.Thread(target=connection.conn)
 connThd.start()
 stat = threading.Thread(target=status)

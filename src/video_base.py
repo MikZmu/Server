@@ -172,7 +172,7 @@ class VideoBase:
         VideoBase.insertVid(2, "atrium", "2016-02-13 01:40:01", "src/vids/black_father_rare_footage.mp4")
         VideoBase.insertVid(3, "foyer", "2013-06-13 05:20:01", "src/vids/desk.mp4")
         VideoBase.insertVid(4, "lobby", "2017-08-13 06:00:01", "src/vids/dog_swing.mp4")
-        VideoBase.insertVid(5, "atrium", "2015-05-13 13:57:01", "src/vids\doge.mp4")
+        VideoBase.insertVid(5, "atrium", "2015-05-13 13:57:01", "src/vids/doge.mp4")
         VideoBase.insertVid(6, "foyer", "2019-03-13 10:25:01", "src/vids/eyes.mp4")
         VideoBase.insertVid(7, "lobby", "2016-01-13 11:00:01", "src/vids/feet_on_sand.mp4")
         VideoBase.insertVid(8, "atrium", "2012-07-13 12:05:01", "src/vids/hands_laptop.mp4")
