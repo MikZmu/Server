@@ -88,18 +88,7 @@ def clear():
         clear = lambda: os.system('cls')
         clear()
 
-def kill_process_using_port(port):
-        print("kill process")
-        try:
-            pid = subprocess.run(
-                ['lsof', '-t', f'-i:{port}'], text=True, capture_output=True
-            ).stdout.strip()
-            if pid:
-                if subprocess.run(['kill', '-TERM', pid]).returncode != 0:
-                    subprocess.run(['kill', '-KILL', pid], check=True)
-                time.sleep(1)  # Give OS time to free up the PORT usage'''
-        except:
-            print("Maybe it is not Linux ???")
+
 
 def status():
     global connState
@@ -118,8 +107,8 @@ video_base.VideoBase.baseInit()
 connection.isLinux()
 commThd = threading.Thread(target=command)
 commThd.start()
-isConnThd = threading.Thread(target=connection.checkSend)
-isConnThd.start()
+#isConnThd = threading.Thread(target=connection.checkSend)
+#isConnThd.start()
 connThd = threading.Thread(target=connection.conn)
 connThd.start()
 stat = threading.Thread(target=status)

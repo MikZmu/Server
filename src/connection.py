@@ -66,6 +66,10 @@ def receive():
             message = phobos.recv(1024).decode('ascii')
             if(message != ''):
                 remoteHandle(message)
+            else:
+                bindState = 'unbound'
+                connState = 'disconnected'
+                break
         except Exception as e:
             bindState = 'unbound'
             connState = 'disconnected'
@@ -172,6 +176,7 @@ def play2(asdf):
         StreamProps.set_Capture(StreamProps,capture)
         StreamProps.set_Quality(StreamProps,90)
         strm = ps.Streamer(address2,StreamProps)
+        phobos.send(str(fps).encode("ascii"))
         phobos.send(str(address2[1]).encode("ascii"))
         print('Server started at','http://'+address2[0]+':'+str(address2[1]))
         stopThd = threading.Thread(target=awaitStop)
@@ -202,12 +207,26 @@ def checkSend():
     global phobos
     global mode
     while(True):
-        time.sleep(0.1)
+        time.sleep(1)
         if(mode == 'check'):
             try:
-                phobos.send("w".encode("ascii"))
+                phobos.sendall("w".encode("ascii"))
                 connState = "connected"
                 bindState = 'bound'
             except Exception as e:
                 bindState = 'unbound'
                 connState = 'disconnected'
+
+
+def kill_process_using_port(port):
+        print("kill process")
+        try:
+            pid = subprocess.run(
+                ['lsof', '-t', f'-i:{port}'], text=True, capture_output=True
+            ).stdout.strip()
+            if pid:
+                if subprocess.run(['kill', '-TERM', pid]).returncode != 0:
+                    subprocess.run(['kill', '-KILL', pid], check=True)
+                time.sleep(1)  # Give OS time to free up the PORT usage'''
+        except:
+            print("Maybe it is not Linux ???")
