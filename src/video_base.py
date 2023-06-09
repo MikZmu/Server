@@ -169,9 +169,9 @@ class VideoBase:
     def baseInit():
         VideoBase.create_video_table()
         VideoBase.insertVid(1, "lobby", "2011-04-13 00:45:01", "src/vids/bear_sits.mp4")
-        VideoBase.insertVid(2, "atrium", "2016-02-13 01:40:01", "src/vids/black_father_rare_footage.mp4")
-        VideoBase.insertVid(3, "foyer", "2013-06-13 05:20:01", "src/vids/desk.mp4")
-        VideoBase.insertVid(4, "lobby", "2017-08-13 06:00:01", "src/vids/dog_swing.mp4")
+        VideoBase.insertVid(2, "atrium", "2016-02-13 01:40:01", "/src/vids/black_father_rare_footage.mp4")
+        VideoBase.insertVid(3, "foyer", "2013-06-13 05:20:01", "/vids/desk.mp4")
+        VideoBase.insertVid(4, "lobby", "2017-08-13 06:00:01", "vids/dog_swing.mp4")
         VideoBase.insertVid(5, "atrium", "2015-05-13 13:57:01", "src/vids/doge.mp4")
         VideoBase.insertVid(6, "foyer", "2019-03-13 10:25:01", "src/vids/eyes.mp4")
         VideoBase.insertVid(7, "lobby", "2016-01-13 11:00:01", "src/vids/feet_on_sand.mp4")

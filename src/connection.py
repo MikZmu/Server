@@ -66,7 +66,7 @@ def receive():
             message = phobos.recv(1024).decode('ascii')
             if(message != ''):
                 remoteHandle(message)
-            else:
+            elif(message ==  b""):
                 bindState = 'unbound'
                 connState = 'disconnected'
                 break
