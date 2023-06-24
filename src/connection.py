@@ -11,6 +11,7 @@ import queue
 import base64
 import pyshine as ps
 import sys
+import killport
 HTML="""
 <html>
 <head>
@@ -79,7 +80,6 @@ def receive():
 def conn2():
     global connState
     global bindState
-    global vidConn
     try:
         global video, phobos, address
         phobos, address= server.accept()
@@ -93,9 +93,9 @@ def conn2():
         bind()
 
 def bind():
+    #killport.kill_ports(ports=[9999])
     global server
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #utworzenie obiektu socket z użyciem konstruktora socket (do użycia z internetem AF_INET, z protokołem TCP - sock_stream)
-    global curState
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     global bindState
     try:
         server.bind((host, 9999))
@@ -118,26 +118,22 @@ def send(message):
                 time.sleep(1)
                 
 def remoteHandle(handled):
-    global mode
     split = handled.split("&")
     global minTimeRemote
+    global maxTimeRemote
     global locationRemote
     if(split[0]=='request'):
-        mode = 'ppp'
         locationRemote =split[1]
         minTimeRemote = split[2]
         maxTimeRemote = split[3]
         tableRemote = video_base.VideoBase.dataToTable(locationRemote,minTimeRemote,maxTimeRemote)
         pickleTable = pickle.dumps(tableRemote)
         phobos.send(pickleTable)
-        mode = 'check'
     elif(split[0]=='play'):
-        mode = 'ppp'
         id = split[1]
         videoRecord = video_base.VideoBase.playQuery(id)
         path = videoRecord[0][3]
         play2(os.path.abspath(path))
-        mode = 'check'
 def getConnState():
     try:
         return connState
@@ -154,7 +150,7 @@ def getBindState():
 
 def play2(asdf):
     global mode
-    mode = 'ppp'
+    print(asdf)
     def awaitStop():
         while(True):
             mess = phobos.recv(1024).decode('ascii')
@@ -201,28 +197,13 @@ def conn():
 
 
 
-def checkSend():
-    global bindState
-    global connState
-    global phobos
-    global mode
-    while(True):
-        time.sleep(1)
-        if(mode == 'check'):
-            try:
-                phobos.sendall("w".encode("ascii"))
-                connState = "connected"
-                bindState = 'bound'
-            except Exception as e:
-                bindState = 'unbound'
-                connState = 'disconnected'
 
 
 def kill_process_using_port(port):
         print("kill process")
         try:
             pid = subprocess.run(
-                ['lsof', '-t', f'-i:{port}'], text=True, capture_output=True
+                ['fuser', '-k', f'-i:{port}'], text=True, capture_output=True
             ).stdout.strip()
             if pid:
                 if subprocess.run(['kill', '-TERM', pid]).returncode != 0:

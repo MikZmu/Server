@@ -1,5 +1,7 @@
 import sqlite3
 import datetime
+import os
+import random
 
 class VideoBase:
 
@@ -166,6 +168,29 @@ class VideoBase:
         except Exception as e:
             print(e)
 
+    def baseInit2():
+        initFlag = 0
+        os.remove("casino_video.db")
+        VideoBase.create_video_table()
+        names = os.listdir(path='src/vids')
+        for path in names:
+            print(path)
+            if(path.lower().endswith(".mp4")):
+                try:
+                    pthSpl = path.split('/')
+                    name = pthSpl[len(pthSpl)-1]
+                    print(name)
+                    nameSpl = name.split('&')
+                    date = nameSpl[2].split(' ')
+                    date1 = date[0]
+                    date2 = date[1].replace('-',':')
+                    VideoBase.insertVid(str(hash(path))[0:4],nameSpl[1],date1 + ' ' + date2.replace('.mp4', ""), 'src/vids/' + path)
+                except:
+                    initFlag = 1
+        return initFlag
+
+            
+
     def baseInit():
         VideoBase.create_video_table()
         VideoBase.insertVid(1, "lobby", "2011-04-13 00:45:01", "src/vids/bear_sits.mp4")
@@ -196,3 +221,4 @@ class VideoBase:
 #print(str(result[0][0])+ " " + str(result[0][1])+ " " + str(result[0][2]))
 #print(str(result[1][0])+ " " + str(result[1][1])+ " " + str(result[1][2]))
 
+VideoBase.baseInit2()

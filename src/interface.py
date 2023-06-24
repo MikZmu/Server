@@ -12,11 +12,17 @@ import imutils
 import queue
 q = queue.Queue(maxsize=300)
 global state
-state = "main menu"
+state = "browse"
 global bindState
 global connState
 bindState = 'a'
 connState = 'b'
+global startTime
+startTime = '1900-01-01 00:00:00'
+global endTime
+endTime = '3000-12-31 23:25:29'
+global location
+location = 'atrium'
 
 def isLinux():
     print("IsLinux")
@@ -37,47 +43,53 @@ def interface():
     while (True):
         update.wait()
         clear()
-        print("Bind Sate " + bindState + " :: "+ connState)
-        if(state == "main menu"):
-            print("1: Browse :: 2: Toggle Connection :: 3: Display IP")
+        if(state == "browse"):
+            print("Bind Sate " + bindState + " :: "+ connState)
+            print('1 : connection setup **** 2 : connect **** 3 : menu **** 4 : show state')
+            print(f"Start Time: {startTime} **** End Time: {endTime}  **** Location: {location}")
+            print("StartTime to set start time **** EndTime to set end time **** Location to set location **** Play to play video")
+            result = video_base.VideoBase.dataToTable(location, startTime, endTime)
+            try:
+                for row in result:
+                    print("ID: "+str(row[0])+" Location: "+ row[1]+ " Time: " + row[2])
+            except Exception as e:
+                print(f"There was a problem with displaying data. Exception {e}")
             print("Command: ")
-        elif(state == "browse"):
-            print("1: select place :: 2: select min time :: 3: select max time :: 4: next page :: 5: previous page :: 6: connection toggle :: 7: display ip")
         update.clear()
 
 def command():
-    command = input()
-    if(command!=""):
-        update.set()
-        handle(command)
+    while(True):
+        command = input()
+        if(command != ""):
+            handle(command)
+            update.set()
 
 
 def handle(command):
-    global minTime
-    global maxTime
+    global startTime
+    global endTime
     global location
-    global result
-    global state
-    print(command)
-    if(state == "main menu"):
-        if(command== '1'):
-            result = video_base.VideoBase.dataToTable(location, minTime, maxTime)
-            for row in result:
-                print (str(row))
-            state='browse'
-        elif(command =='2'):
-            print("display ip")
-    elif(state == 'browse'):
-        if(command=='1'):
-            location = input ("Min time = ")
-            result = video_base.VideoBase.dataToTable(location, minTime, maxTime)
-            print (result)
-        if(command=='2'):
-            maxTime = input ('Max time = ' )
-            result = video_base.VideoBase.dataToTable(location, minTime, maxTime)
-        if(command=='3'):
-            location = input("Location = ")
-            result = video_base.VideoBase.fiBlobData(location, minTime, maxTime)
+    if(state == 'browse'):
+        if(command == 'StartTime'):
+                print("YYYY-MM-DD HH:MM:SS : ")
+                startYear = input('year ')
+                startMonth = input('month ')
+                startDay = input('day ')
+                startHour = input('hour ')
+                startMinute = input('minute ')
+                startSecond = input('second ')
+                startTime = startYear+'-'+startMonth+'-'+startDay+" "+startHour+":"+startMinute+":"+startSecond
+        if(command == 'EndTime'):
+                print("YYYY-MM-DD HH:MM:SS : ")
+                endYear = input('year ')
+                endMonth = input('month ')
+                endDay = input('day ')
+                endHour = input('hour ')
+                endMinute = input('minute ')
+                endSecond = input('second ')
+                endTime = endYear+'-'+endMonth+'-'+endDay+" "+endHour+":"+endMinute+":"+endSecond
+        if(command == 'location'):
+                location = input("location: ")
         
 
 def clear():
@@ -103,7 +115,7 @@ def status():
             update.set()
 
 isLinux()
-video_base.VideoBase.baseInit()
+initFlag =video_base.VideoBase.baseInit2()
 connection.isLinux()
 commThd = threading.Thread(target=command)
 commThd.start()
