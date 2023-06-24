@@ -23,6 +23,9 @@ global endTime
 endTime = '3000-12-31 23:25:29'
 global location
 location = 'atrium'
+global page
+page = 0
+global result
 
 def isLinux():
     print("IsLinux")
@@ -40,20 +43,25 @@ def interface():
     global toggle
     global page
     global state
+    global result
     while (True):
         update.wait()
         clear()
         if(state == "browse"):
-            print("Bind Sate " + bindState + " :: "+ connState)
-            print('1 : connection setup **** 2 : connect **** 3 : menu **** 4 : show state')
+            if(initFlag == 1):
+                 print('There was an error during adding files. Please check file name formatting')
+            print("Bind Sate " + bindState + " :: "+ connState + '::: ip: ' + socket.gethostbyname(socket.gethostname()))
             print(f"Start Time: {startTime} **** End Time: {endTime}  **** Location: {location}")
             print("StartTime to set start time **** EndTime to set end time **** Location to set location **** Play to play video")
+            print('next for next page ::: prev for previous page')
+            print("StartTime: " + startTime + " EndTime: " + endTime + " location: " + location)
             result = video_base.VideoBase.dataToTable(location, startTime, endTime)
             try:
-                for row in result:
-                    print("ID: "+str(row[0])+" Location: "+ row[1]+ " Time: " + row[2])
+                for x in range(page * 10, ((page +1)  * 10)):
+                    print("ID: "+str(result[x][0])+" Location: "+ result[x][1]+ " Time: " + result[x][2])
             except Exception as e:
                 print(f"There was a problem with displaying data. Exception {e}")
+            print("Page: " + str(page+1) + " out of " + str(int(len(result)/10+1)))
             print("Command: ")
         update.clear()
 
@@ -69,6 +77,8 @@ def handle(command):
     global startTime
     global endTime
     global location
+    global result
+    global page
     if(state == 'browse'):
         if(command == 'StartTime'):
                 print("YYYY-MM-DD HH:MM:SS : ")
@@ -79,7 +89,7 @@ def handle(command):
                 startMinute = input('minute ')
                 startSecond = input('second ')
                 startTime = startYear+'-'+startMonth+'-'+startDay+" "+startHour+":"+startMinute+":"+startSecond
-        if(command == 'EndTime'):
+        elif(command == 'EndTime'):
                 print("YYYY-MM-DD HH:MM:SS : ")
                 endYear = input('year ')
                 endMonth = input('month ')
@@ -88,8 +98,15 @@ def handle(command):
                 endMinute = input('minute ')
                 endSecond = input('second ')
                 endTime = endYear+'-'+endMonth+'-'+endDay+" "+endHour+":"+endMinute+":"+endSecond
-        if(command == 'location'):
+        elif(command == 'location'):
                 location = input("location: ")
+        elif(command == 'next'):
+             if(page < len(result)):
+                  page += 1
+        elif(command == 'prev'):
+             if(page > 0):
+                  page -= 1
+
         
 
 def clear():
@@ -108,10 +125,12 @@ def status():
     while(True):
         newconnState = connection.getConnState()
         newbindState = connection.getBindState()
+        clearFlag = connection.getFlag()
         time.sleep(0.1)
-        if(newconnState != connState or newbindState != bindState):
+        if(newconnState != connState or newbindState != bindState or clearFlag == 1):
             bindState = newbindState
             connState = newconnState
+            connection.flag = 0
             update.set()
 
 isLinux()

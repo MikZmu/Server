@@ -12,6 +12,7 @@ import base64
 import pyshine as ps
 import sys
 import killport
+
 HTML="""
 <html>
 <head>
@@ -24,7 +25,8 @@ HTML="""
 </body>
 </html>
 """
-
+global flag
+flag = 0
 global q
 q = queue.Queue(maxsize=10000)
 global bindState
@@ -132,8 +134,12 @@ def remoteHandle(handled):
     elif(split[0]=='play'):
         id = split[1]
         videoRecord = video_base.VideoBase.playQuery(id)
+        if(len(videoRecord)== 0):
+            phobos.send('stop'.encode("ascii"))
+            return 0
         path = videoRecord[0][3]
         play2(os.path.abspath(path))
+
 def getConnState():
     try:
         return connState
@@ -145,11 +151,14 @@ def getBindState():
         return bindState
     except:
         return 'unbound'
+    
+def getFlag():
+    return flag
 
 
 
 def play2(asdf):
-    global mode
+    global flag
     print(asdf)
     def awaitStop():
         while(True):
@@ -179,12 +188,13 @@ def play2(asdf):
         stopThd.start()
         strm.serve_forever()
     except Exception as e:
+        capture.release()
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
         strm.shutdown()
     
-    mode = 'check'
+    flag = 1
     
 
 

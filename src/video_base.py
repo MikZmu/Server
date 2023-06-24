@@ -4,7 +4,14 @@ import os
 import random
 
 class VideoBase:
-
+    def isLinux():
+        print("IsLinux")
+        from sys import platform
+        global linuxMode
+        if(platform == "linux" or platform == 'linux2'):    
+            return 1
+        else:
+            return 0
 
     def create_video_table():
         try:
@@ -170,9 +177,20 @@ class VideoBase:
 
     def baseInit2():
         initFlag = 0
-        os.remove("casino_video.db")
-        VideoBase.create_video_table()
-        names = os.listdir(path='src/vids')
+        try:
+            os.remove("casino_video.db")
+        except:
+            print('nothing')
+        try:
+            VideoBase.create_video_table()
+        except:
+            print('nothing')
+        if(VideoBase.isLinux() == 1):
+            names = os.listdir(path='vids/')
+            app = ""
+        else:
+            names = os.listdir(path='src/vids/')
+            app = 'src/'
         for path in names:
             print(path)
             if(path.lower().endswith(".mp4")):
@@ -181,10 +199,10 @@ class VideoBase:
                     name = pthSpl[len(pthSpl)-1]
                     print(name)
                     nameSpl = name.split('&')
-                    date = nameSpl[2].split(' ')
+                    date = nameSpl[1].split(' ')
                     date1 = date[0]
                     date2 = date[1].replace('-',':')
-                    VideoBase.insertVid(str(hash(path))[0:4],nameSpl[1],date1 + ' ' + date2.replace('.mp4', ""), 'src/vids/' + path)
+                    VideoBase.insertVid(str(hash(path))[0:4],nameSpl[0],date1 + ' ' + date2.replace('.mp4', ""), app + 'vids/' + path)
                 except:
                     initFlag = 1
         return initFlag
