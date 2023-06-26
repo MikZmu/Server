@@ -53,7 +53,7 @@ def interface():
             print("Bind Sate " + bindState + " :: "+ connState + '::: ip: ' + socket.gethostbyname(socket.gethostname()))
             print(f"Start Time: {startTime} **** End Time: {endTime}  **** Location: {location}")
             print("StartTime to set start time **** EndTime to set end time **** Location to set location **** Play to play video")
-            print('next for next page ::: prev for previous page')
+            print('next for next page ::: prev for previous page ::: reset to update database')
             print("StartTime: " + startTime + " EndTime: " + endTime + " location: " + location)
             result = video_base.VideoBase.dataToTable(location, startTime, endTime)
             try:
@@ -106,6 +106,8 @@ def handle(command):
         elif(command == 'prev'):
              if(page > 0):
                   page -= 1
+        elif(command == 'reset'):
+             video_base.VideoBase.baseInit2()
 
         
 
@@ -138,8 +140,6 @@ initFlag =video_base.VideoBase.baseInit2()
 connection.isLinux()
 commThd = threading.Thread(target=command)
 commThd.start()
-#isConnThd = threading.Thread(target=connection.checkSend)
-#isConnThd.start()
 connThd = threading.Thread(target=connection.conn)
 connThd.start()
 stat = threading.Thread(target=status)

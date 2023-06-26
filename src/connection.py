@@ -6,12 +6,8 @@ import video_base
 import pickle
 import cv2 as cv
 import os
-import imutils
-import queue
-import base64
 import pyshine as ps
 import sys
-import killport
 
 HTML="""
 <html>
@@ -27,27 +23,19 @@ HTML="""
 """
 global flag
 flag = 0
-global q
-q = queue.Queue(maxsize=10000)
 global bindState
 global connState
 bindState = 'unbound'
 connState = 'disconnected'
 global host
 host = '0.0.0.0'
-global minTime, maxTime, location, result, page
 minTime = '1900-01-01 00:00:00'
 maxTime = '3000-12-31 23:25:29'
 location = 'any'
 global minTimeRemote, maxTimeRemote, locationRemote
-minTimeRemote = 'any'
-maxTimeRemote = 'any'
-locationRemote = 'any'
 StreamProps = ps.StreamProps
 StreamProps.set_Page(StreamProps,HTML)
 address2 = ("0.0.0.0",9998)
-global mode
-mode = 'check'
 
 
 
@@ -95,7 +83,6 @@ def conn2():
         bind()
 
 def bind():
-    #killport.kill_ports(ports=[9999])
     global server
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     global bindState
@@ -207,17 +194,3 @@ def conn():
 
 
 
-
-
-def kill_process_using_port(port):
-        print("kill process")
-        try:
-            pid = subprocess.run(
-                ['fuser', '-k', f'-i:{port}'], text=True, capture_output=True
-            ).stdout.strip()
-            if pid:
-                if subprocess.run(['kill', '-TERM', pid]).returncode != 0:
-                    subprocess.run(['kill', '-KILL', pid], check=True)
-                time.sleep(1)  # Give OS time to free up the PORT usage'''
-        except:
-            print("Maybe it is not Linux ???")

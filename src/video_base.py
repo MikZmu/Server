@@ -209,7 +209,7 @@ class VideoBase:
 
             
 
-    def baseInit():
+    """def baseInit():
         VideoBase.create_video_table()
         VideoBase.insertVid(1, "lobby", "2011-04-13 00:45:01", "src/vids/bear_sits.mp4")
         VideoBase.insertVid(2, "atrium", "2016-02-13 01:40:01", "/src/vids/black_father_rare_footage.mp4")
@@ -222,21 +222,4 @@ class VideoBase:
         VideoBase.insertVid(9, "foyer", "2023-09-13 12:50:01", "src/vids/hors.mp4")
         VideoBase.insertVid(10, "lobby", "2022-10-13 16:50:01", "src/vids/lions.mp4")
         VideoBase.insertVid(11, "atrium", "2020-11-13 21:15:01", "src/vids/sanitizer.mp4")
-        VideoBase.insertVid(12, "foyer", "2021-12-13 23:10:01", "src/vids/tired.mp4")
-
-
-#VideoBase.create_video_table()
-#VideoBase.insertBLOB(1, "lobby", "2023-04-13 13:57:01", r"C:\Users\52 Blue\Downloads\K2.pdf")
-#VideoBase.insertBLOB(2, "lobby", "2023-04-13 13:57:01", r"C:\Users\52 Blue\Downloads\JavaCheatsheet.pdf")
-#VideoBase.insertBLOB(2, "foyer", "2023-04-13 14:37:01", "E:\Pobrane\mrowka2.mp4")
-#VideoBase.insertBLOB(3, "atrium", "2023-04-12 12:37:01", "E:\Pobrane\mrowka3.mp4")
-
-
-#VideoBase.readBlobData("lobby", "2023-04-13 13:57:01")
-#VideoBase.readBlobData("foyer", "2023-04-13 14:37:01")
-#VideoBase.readBlobData("atrium")
-#result = VideoBase.dataToTable("lobby","2023-04-12 13:57:01","2023-04-14 15:00:00")
-#print(str(result[0][0])+ " " + str(result[0][1])+ " " + str(result[0][2]))
-#print(str(result[1][0])+ " " + str(result[1][1])+ " " + str(result[1][2]))
-
-VideoBase.baseInit2()
+        VideoBase.insertVid(12, "foyer", "2021-12-13 23:10:01", "src/vids/tired.mp4")"""
